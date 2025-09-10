@@ -129,6 +129,24 @@
       saveAvailLoading = false;
     }
   }
+
+  async function deleteAvailability(id: string) {
+    if (!token || !participantId) return;
+    try {
+      const res = await fetch(`/api/polls/${pollId}/availability/${id}?t=${encodeURIComponent(token)}&pid=${encodeURIComponent(participantId)}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        try { const j = await res.json(); throw new Error(j?.error || 'Delete failed'); } catch { throw new Error('Delete failed'); }
+      }
+      // refresh snapshot
+      const r2 = await fetch(`/api/polls/${pollId}?t=${encodeURIComponent(token)}`);
+      const j2 = await r2.json();
+      if (r2.ok) {
+        availabilities = j2.availabilities ?? [];
+      }
+    } catch (e: any) {
+      error = e?.message ?? 'Failed to delete availability';
+    }
+  }
 </script>
 
 <section class="max-w-6xl mx-auto p-6 space-y-6">
@@ -187,8 +205,14 @@
         <p class="text-sm opacity-70">No availability yet.</p>
       {:else}
         <ul class="text-sm space-y-1">
-          {#each availabilities as a}
-            <li>• {a.participant_id.slice(0, 8)}…: {a.start_ts} → {a.end_ts}</li>
+      {#each availabilities as a}
+            <li class="flex items-center justify-between gap-3">
+              <span>• {a.participant_id.slice(0, 8)}…: {a.start_ts} → {a.end_ts}</span>
+              {#if participantId === a.participant_id}
+                <button class="text-xs px-2 py-1 rounded border border-red-500 text-red-300 hover:bg-red-500/10"
+                  on:click|preventDefault={() => deleteAvailability(a.id)}>Delete</button>
+              {/if}
+            </li>
           {/each}
         </ul>
       {/if}

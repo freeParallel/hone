@@ -194,6 +194,29 @@ curl -X POST "http://127.0.0.1:5173/api/polls/$POLL_ID/availability?t=$TOKEN" \
 
 ---
 
+## DELETE /api/polls/:id/availability/:availabilityId?t=<token>&pid=<participant_id>
+Delete a single availability block that belongs to the given participant.
+
+Rules
+- Token must be valid and active for the poll.
+- The availability row must belong to the same poll and the provided participant id.
+
+Response
+- 204 No Content on success
+
+Errors
+- 400 Missing params (token/pid)
+- 403 Invalid token or unauthorized (row does not belong to participant/poll)
+- 404 Availability not found
+- 500 DB error
+
+Example
+```bash
+curl -X DELETE "http://127.0.0.1:5173/api/polls/$POLL_ID/availability/$AVAILABILITY_ID?t=$TOKEN&pid=$PARTICIPANT_ID" -i
+```
+
+---
+
 ## Planned endpoints (next)
 - POST /api/polls/:id/suggest — compute ranked suggestions (edge function)
 - GET /api/polls/:id/suggestions — read last computed results
