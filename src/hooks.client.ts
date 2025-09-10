@@ -10,8 +10,13 @@ if (clientDsn) {
 const phKey = (import.meta.env.VITE_POSTHOG_KEY as string) || undefined;
 const phHost = (import.meta.env.VITE_POSTHOG_HOST as string) || 'https://us.i.posthog.com';
 if (phKey) {
-  // disable automatic pageview; we'll capture in +layout.svelte on route changes
-  posthog.init(phKey, { api_host: phHost, autocapture: true, capture_pageview: false });
+  // enable automatic pageview tracking including SPA route changes
+  posthog.init(phKey, {
+    api_host: phHost,
+    autocapture: true,
+    capture_pageview: true,
+    capture_pageview_on_history_change: true
+  });
 }
 
 export const handleError = Sentry.handleErrorWithSentry();
