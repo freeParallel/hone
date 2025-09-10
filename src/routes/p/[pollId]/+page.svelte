@@ -3,7 +3,7 @@
   import { onDestroy, onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { supabase } from '$lib/supabase/client';
-  import TimelineHorizon from '$lib/components/TimelineHorizon.svelte';
+  import GridCalendar from '$lib/components/GridCalendar.svelte';
 
   type Poll = {
     id: string;
@@ -197,8 +197,10 @@ curl -X DELETE "$BASE/api/polls/$POLL_ID/availability/$AVAILABILITY_ID?t=$TOKEN&
     {/if}
 
     <div class="rounded border border-neutral-800 p-4 mt-6">
-      <TimelineHorizon
-        date={poll?.start_date}
+      <GridCalendar
+        start_date={poll?.start_date}
+        end_date={poll?.end_date}
+        duration={poll?.duration_minutes}
         myBlocks={participantId ? (availabilities || []).filter(a=>a.participant_id===participantId) : []}
         otherBlocks={(availabilities || []).filter(a=>!participantId || a.participant_id!==participantId)}
         disabled={!participantId}
@@ -216,22 +218,6 @@ curl -X DELETE "$BASE/api/polls/$POLL_ID/availability/$AVAILABILITY_ID?t=$TOKEN&
             const r2 = await fetch(`/api/polls/${pollId}?t=${encodeURIComponent(token)}`);
             const j2 = await r2.json(); if (r2.ok) availabilities = j2.availabilities ?? [];
           } catch (e:any) { error = e?.message ?? 'Failed to add'; }
-        }}
-        on:resize={async (ev)=>{
-          if (!token || !participantId) return;
-          const { id, start, end } = ev.detail;
-          try {
-            // delete then add new block
-            const del = await fetch(`/api/polls/${pollId}/availability/${id}?t=${encodeURIComponent(token)}&pid=${encodeURIComponent(participantId)}`, { method: 'DELETE' });
-            if (!(del.ok || del.status===204)) { try { const j=await del.json(); throw new Error(j?.error||'Resize failed'); } catch { throw new Error('Resize failed'); } }
-            const add = await fetch(`/api/polls/${pollId}/availability?t=${encodeURIComponent(token)}`, {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ participant_id: participantId, blocks: [{ start, end }], replace: false })
-            });
-            if (!add.ok) { try { const j=await add.json(); throw new Error(j?.error||'Resize failed'); } catch { throw new Error('Resize failed'); } }
-            const r2 = await fetch(`/api/polls/${pollId}?t=${encodeURIComponent(token)}`);
-            const j2 = await r2.json(); if (r2.ok) availabilities = j2.availabilities ?? [];
-          } catch (e:any) { error = e?.message ?? 'Failed to resize'; }
         }}
         on:delete={async (ev)=>{
           if (!token || !participantId) return;
