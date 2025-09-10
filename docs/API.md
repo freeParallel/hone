@@ -143,8 +143,58 @@ curl -X POST "http://127.0.0.1:5173/api/polls/<poll_id>/participants?t=<token>" 
 
 ---
 
+## POST /api/polls/:id/availability?t=<token>
+Upsert availability blocks for a participant.
+
+Request
+```
+{
+  "participant_id": "<uuid>",
+  "blocks": [
+    { "start": "2025-09-10T14:00", "end": "2025-09-10T15:00" }
+  ],
+  "replace": true // optional; default true
+}
+```
+- start/end accept ISO8601 strings. For CLI testing, prefer timezone-explicit values like `2025-09-10T14:00:00Z`.
+- When replace = true: existing blocks for this participant and poll are removed, then new blocks inserted.
+- When replace = false: new blocks are appended.
+
+Response 201
+```
+{ "ok": true, "inserted": 1 }
+```
+
+Errors
+- 400 Invalid input / Missing token
+- 403 Invalid or inactive token, or participant not in poll
+- 500 DB error
+
+Examples
+Append a block
+```bash
+curl -X POST "http://127.0.0.1:5173/api/polls/$POLL_ID/availability?t=$TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "participant_id":"'$PARTICIPANT_ID'",
+    "blocks":[{"start":"2025-09-10T14:00:00Z","end":"2025-09-10T15:00:00Z"}],
+    "replace":false
+  }'
+```
+Replace all blocks
+```bash
+curl -X POST "http://127.0.0.1:5173/api/polls/$POLL_ID/availability?t=$TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "participant_id":"'$PARTICIPANT_ID'",
+    "blocks":[{"start":"2025-09-11T09:00:00Z","end":"2025-09-11T10:30:00Z"}],
+    "replace":true
+  }'
+```
+
+---
+
 ## Planned endpoints (next)
-- POST /api/polls/:id/availability — upsert availability blocks (requires participant id)
 - POST /api/polls/:id/suggest — compute ranked suggestions (edge function)
 - GET /api/polls/:id/suggestions — read last computed results
 - GET /api/polls/:id/ics?start=...&end=... — export selected slot

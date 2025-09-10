@@ -96,6 +96,7 @@
   // Minimal availability form
   let aStart = '';
   let aEnd = '';
+  let replaceAll = false;
   let saveAvailLoading = false;
   async function saveAvailability(ev: Event) {
     ev.preventDefault();
@@ -105,7 +106,7 @@
       const body = {
         participant_id: participantId,
         blocks: [{ start: aStart, end: aEnd }],
-        replace: false
+        replace: replaceAll
       };
       const res = await fetch(`/api/polls/${pollId}/availability?t=${encodeURIComponent(token)}`, {
         method: 'POST',
@@ -170,9 +171,13 @@
             <label for="aEnd" class="block text-sm mb-1">End (local)</label>
             <input id="aEnd" type="datetime-local" class="w-full px-3 py-2 rounded bg-neutral-900 text-white border border-neutral-700" bind:value={aEnd} required />
           </div>
+          <div class="flex items-center gap-2">
+            <input id="replaceAll" type="checkbox" bind:checked={replaceAll} />
+            <label for="replaceAll">Replace all my availability</label>
+          </div>
           <button class="px-4 py-2 rounded bg-white text-black" disabled={saveAvailLoading}>{saveAvailLoading ? 'Saving…' : 'Add block'}</button>
         </form>
-        <p class="text-xs opacity-60">This is a temporary form; the drag/resize timeline UI will replace it.</p>
+        <p class="text-xs opacity-60">Toggle “Replace all” to overwrite all your existing availability with the new block(s). Otherwise, blocks are appended.</p>
       </div>
     {/if}
 
