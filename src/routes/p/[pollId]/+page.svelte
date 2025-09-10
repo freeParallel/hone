@@ -23,6 +23,8 @@
   let loading = true;
   let error = '';
   let poll: Poll | null = null;
+  let participants: any[] = [];
+  let availabilities: any[] = [];
   let participantId: string | null = null;
 
   onMount(async () => {
@@ -38,6 +40,8 @@
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || 'Failed to load poll');
       poll = json.poll;
+      participants = json.participants ?? [];
+      availabilities = json.availabilities ?? [];
 
       // read stored participant id if present
       const key = `participant:${pollId}`;
@@ -88,6 +92,42 @@
       joinLoading = false;
     }
   }
+
+  // Minimal availability form
+  let aStart = '';
+  let aEnd = '';
+  let saveAvailLoading = false;
+  async function saveAvailability(ev: Event) {
+    ev.preventDefault();
+    if (!token || !participantId) return;
+    saveAvailLoading = true;
+    try {
+      const body = {
+        participant_id: participantId,
+        blocks: [{ start: aStart, end: aEnd }],
+        replace: false
+      };
+      const res = await fetch(`/api/polls/${pollId}/availability?t=${encodeURIComponent(token)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Failed to save availability');
+      // refresh snapshot
+      const r2 = await fetch(`/api/polls/${pollId}?t=${encodeURIComponent(token)}`);
+      const j2 = await r2.json();
+      if (r2.ok) {
+        availabilities = j2.availabilities ?? [];
+      }
+      aStart = '';
+      aEnd = '';
+    } catch (e: any) {
+      error = e?.message ?? 'Failed to save availability';
+    } finally {
+      saveAvailLoading = false;
+    }
+  }
 </script>
 
 <section class="max-w-6xl mx-auto p-6 space-y-6">
@@ -118,7 +158,38 @@
       <TimelineHorizon />
     </div>
 
-    <div class="text-sm text-neutral-500">Realtime updates will appear in console for now.</div>
+    {#if participantId}
+      <div class="mt-6 grid gap-3 max-w-md">
+        <h3 class="font-semibold">Add availability (quick form)</h3>
+        <form class="grid gap-3" on:submit|preventDefault={saveAvailability}>
+          <div>
+            <label for="aStart" class="block text-sm mb-1">Start (local)</label>
+            <input id="aStart" type="datetime-local" class="w-full px-3 py-2 rounded bg-neutral-900 text-white border border-neutral-700" bind:value={aStart} required />
+          </div>
+          <div>
+            <label for="aEnd" class="block text-sm mb-1">End (local)</label>
+            <input id="aEnd" type="datetime-local" class="w-full px-3 py-2 rounded bg-neutral-900 text-white border border-neutral-700" bind:value={aEnd} required />
+          </div>
+          <button class="px-4 py-2 rounded bg-white text-black" disabled={saveAvailLoading}>{saveAvailLoading ? 'Saving…' : 'Add block'}</button>
+        </form>
+        <p class="text-xs opacity-60">This is a temporary form; the drag/resize timeline UI will replace it.</p>
+      </div>
+    {/if}
+
+    <div class="mt-6">
+      <h3 class="font-semibold mb-2">Current availability (all participants)</h3>
+      {#if availabilities.length === 0}
+        <p class="text-sm opacity-70">No availability yet.</p>
+      {:else}
+        <ul class="text-sm space-y-1">
+          {#each availabilities as a}
+            <li>• {a.participant_id.slice(0, 8)}…: {a.start_ts} → {a.end_ts}</li>
+          {/each}
+        </ul>
+      {/if}
+    </div>
+
+    <div class="text-sm text-neutral-500 mt-6">Realtime updates will appear in console for now.</div>
   {/if}
 </section>
 
