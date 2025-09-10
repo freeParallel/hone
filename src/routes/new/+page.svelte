@@ -45,6 +45,20 @@
       if (!res.ok) {
         throw new Error(json?.error || 'Failed to create poll');
       }
+
+      // analytics: poll created
+      try {
+        const { default: posthog } = await import('posthog-js');
+        if ((import.meta as any).env?.VITE_POSTHOG_KEY) {
+          posthog.capture('poll_created', {
+            poll_id: json.id,
+            duration_minutes: form.durationMinutes,
+            timezone_mode: form.timezoneMode,
+            fairness_mode: form.fairnessMode
+          });
+        }
+      } catch {}
+
       await goto(json.link || `/p/${json.id}`);
     } catch (e: any) {
       error = e?.message ?? 'Invalid input';
