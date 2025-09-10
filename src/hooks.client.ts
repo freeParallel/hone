@@ -10,12 +10,12 @@ if (clientDsn) {
 const phKey = (import.meta.env.VITE_POSTHOG_KEY as string) || undefined;
 const phHost = (import.meta.env.VITE_POSTHOG_HOST as string) || 'https://us.i.posthog.com';
 if (phKey) {
-  // enable automatic pageview tracking including SPA route changes
+  // Disable PostHog's history hooks to avoid SvelteKit warning; we capture pageviews manually in +layout.svelte
   posthog.init(phKey, {
     api_host: phHost,
     autocapture: true,
-    capture_pageview: true,
-    capture_pageview_on_history_change: true
+    capture_pageview: false,
+    capture_pageview_on_history_change: false
   });
 }
 
