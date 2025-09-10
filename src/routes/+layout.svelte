@@ -6,13 +6,13 @@
   import { browser } from '$app/environment';
 
   onMount(() => {
-    if (browser && (import.meta as any).env?.VITE_POSTHOG_KEY) {
+    if (browser && (window as any).posthog?.capture) {
       posthog.capture('$pageview');
     }
   });
 
   afterNavigate(() => {
-    if ((import.meta as any).env?.VITE_POSTHOG_KEY) {
+    if ((window as any).posthog?.capture) {
       posthog.capture('$pageview');
     }
   });

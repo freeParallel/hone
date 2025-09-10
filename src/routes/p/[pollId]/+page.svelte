@@ -243,7 +243,7 @@ curl -X DELETE "$BASE/api/polls/$POLL_ID/availability/$AVAILABILITY_ID?t=$TOKEN&
 
     <div class="text-sm text-neutral-500 mt-6">Realtime updates will appear in console for now.</div>
 
-    <div class="mt-8 rounded-md border border-neutral-800 p-4 text-sm">
+    <div class="mt-8 rounded-md border border-neutral-800 p-4 text-sm text-white">
       <h3 class="font-semibold mb-2">API testing helpers</h3>
       <div class="grid gap-2">
         <div>Base URL: <code class="px-2 py-1 rounded bg-neutral-900 border border-neutral-700">{base}</code></div>
