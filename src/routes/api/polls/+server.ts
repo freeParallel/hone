@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getServiceClient } from '$lib/supabase/server';
 
 const schema = z.object({
-  title: z.string().min(1),
+  title: z.string().optional(), // allow empty/default title
   durationMinutes: z.number().min(15).max(480),
   timezoneMode: z.enum(['local', 'organizer', 'utc']).default('local'),
   fairnessMode: z.boolean().default(false),
@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ request }) => {
   const { data: poll, error: pollErr } = await supabase
     .from('polls')
     .insert({
-      title: input.title,
+      title: (input.title ?? '').trim(),
       duration_minutes: input.durationMinutes,
       start_date: startDate.toISOString().slice(0, 10),
       end_date: endDate.toISOString().slice(0, 10),

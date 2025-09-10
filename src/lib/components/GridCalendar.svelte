@@ -75,8 +75,15 @@
     <div class="daycol">
       <div class="h-8 border-b border-neutral-800 font-semibold">{day}</div>
       {#each Array(slotsPerDay) as _, i}
-        <div class="h-8 border-t border-neutral-800 hover:bg-neutral-800/70 cursor-pointer" on:click={() => onCellClick(day, i)}></div>
+        <div class="h-8 border-t border-neutral-800 hover:bg-neutral-800/70 cursor-pointer"
+             role="button" tabindex="0"
+             on:click={() => onCellClick(day, i)}
+             on:keydown={(e) => (e.key==='Enter'||e.key===' ')? onCellClick(day,i) : null}></div>
       {/each}
+
+      <!-- quiet hours shading (00–07 and 22–24) -->
+      <div class="absolute left-0 right-0 bg-neutral-800/40 pointer-events-none" style={`top:${0*32+8}px; height:${Math.floor(7*60/duration)*32}px`}></div>
+      <div class="absolute left-0 right-0 bg-neutral-800/40 pointer-events-none" style={`top:${Math.floor(22*60/duration)*32+8}px; bottom:8px`}></div>
 
       <!-- other blocks -->
       {#each otherBlocks as ob}
@@ -88,7 +95,7 @@
       <!-- my blocks (click to delete) -->
       {#each myBlocks as mb}
         {#if mb && mb.start_ts.slice(0,10) === day}
-          <div class="block bg-blue-500/40 border border-blue-400/50" style={`top:${cellSpan(mb).startIdx*32+8}px; height:${cellSpan(mb).span*32 - 6}px`} on:click={() => dispatch('delete', { id: mb.id })}></div>
+          <div class="block bg-blue-500/40 border border-blue-400/50" style={`top:${cellSpan(mb).startIdx*32+8}px; height:${cellSpan(mb).span*32 - 6}px`} role="button" tabindex="0" on:click={() => dispatch('delete', { id: mb.id })} on:keydown={(e)=> (e.key==='Enter'||e.key===' ')? dispatch('delete',{id:mb.id}) : null}></div>
         {/if}
       {/each}
     </div>

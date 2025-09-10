@@ -23,6 +23,25 @@
   let loading = true;
   let error = '';
   let poll: Poll | null = null;
+  const durationChips = [15, 30, 45, 60, 90, 120];
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  async function patchSetting<K extends keyof Poll>(field: K, value: Poll[K]) {
+    if (!poll) return;
+    try {
+      const res = await fetch(`/api/polls/${pollId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [field]: value })
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(()=>({}));
+        throw new Error(j?.error || 'Failed to save');
+      }
+      const j = await res.json();
+      poll = j.poll as any;
+    } catch (e:any) {
+      error = e?.message || 'Failed to save setting';
+    }
+  }
   let participants: any[] = [];
   let availabilities: any[] = [];
   let participantId: string | null = null;
@@ -197,6 +216,16 @@ curl -X DELETE "$BASE/api/polls/$POLL_ID/availability/$AVAILABILITY_ID?t=$TOKEN&
     {/if}
 
     <div class="rounded border border-neutral-800 p-4 mt-6">
+      <div class="flex items-center justify-between mb-3">
+        <div class="opacity-70 text-sm">Your local time: {tz}</div>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="opacity-70">Duration:</span>
+          {#each durationChips as d}
+            <button class={`px-2 py-1 rounded border ${poll && poll.duration_minutes===d ? 'bg-white text-black border-white' : 'border-neutral-700 hover:bg-neutral-800'}`}
+                    on:click={() => patchSetting('duration_minutes' as any, d as any)}>{d}m</button>
+          {/each}
+        </div>
+      </div>
       <GridCalendar
         start_date={poll?.start_date}
         end_date={poll?.end_date}
