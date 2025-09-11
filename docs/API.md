@@ -60,7 +60,8 @@ curl -X POST http://127.0.0.1:5173/api/polls \
 ```
 
 Notes
-- Default poll window is today..+7 days (UTC). Can be extended later via UI.
+- Default poll window is today..+7 days (UTC). Kept in the DB for compatibility. The current client UI ignores start_date/end_date and uses a rolling week navigation with the grid as the source of truth.
+- Times are stored in UTC and rendered in the user's local time on the client. The calendar includes a current-time indicator and an inner scrollable area (8h by default) to navigate 24 hours.
 
 ---
 

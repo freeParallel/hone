@@ -30,8 +30,9 @@ Realtime
 - [~] Supabase Realtime stub wired on client (payload logs); publication setup pending in DB
 
 Core UI
-- [x] TimelineHorizon placeholder
-- [ ] Availability CRUD (drag to add/resize/delete)
+- [x] GridCalendar week view (7 cols) with inner vertical scroll (8h viewport)
+- [x] Availability add via multi-cell drag; delete via click/keyboard; erase mode
+- [ ] Resize availability blocks (scheduled)
 - [ ] Live overlap glow
 - [ ] Time zone auto-detect + manual override per participant (UI pass on poll page partially done for join; full per-user control later)
 
@@ -57,7 +58,7 @@ Collaboration
 
 Alternate View
 - [ ] Heatmap View (compute intensity from availability data)
-- [ ] Accessibility pass (labels/keyboard/contrast)
+- [~] Accessibility pass (labels/keyboard/contrast) — initial pass added roles/tabindex/keyboard for grid cells and blocks; more to come
 
 Polish
 - [ ] Empty states & skeleton loaders
@@ -83,7 +84,7 @@ Current Feature Status Snapshot
 - Poll Snapshot (by token): DONE (GET /api/polls/:id?t=)
 - Join Poll (participant): DONE (POST /api/polls/:id/participants?t=)
 - Poll Page Load: DONE (loads by token, join form + localStorage)
-- Availability CRUD: PENDING
+- Availability CRUD: PARTIAL (add, delete via GridCalendar; resize pending)
 - Suggestions Engine: PENDING
 - Heatmap: PENDING
 - ICS Export: PENDING
@@ -93,7 +94,7 @@ Current Feature Status Snapshot
 ---
 
 Next Focus (suggested)
-1) Availability CRUD endpoints + UI wiring in TimelineHorizon
+1) GridCalendar: block resizing + overlap visualization (glow)
 2) Suggestions edge function + minimal Suggestions panel
-3) CI workflow (typecheck/build) and basic a11y fixes
+3) CI workflow (typecheck/build) and continue a11y fixes
 

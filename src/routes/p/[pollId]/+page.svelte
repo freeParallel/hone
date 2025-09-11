@@ -198,7 +198,7 @@ curl -X DELETE "$BASE/api/polls/$POLL_ID/availability/$AVAILABILITY_ID?t=$TOKEN&
     <p class="text-red-400">{error}</p>
   {:else}
     <h2 class="text-2xl font-semibold">{poll?.title || 'Untitled poll'}</h2>
-    <p class="text-sm opacity-70">Window: {poll?.start_date} → {poll?.end_date} • Duration: {poll?.duration_minutes}m</p>
+    <p class="text-sm opacity-70">Duration: {poll?.duration_minutes}m • {tz}</p>
 
     {#if !participantId}
       <form class="mt-4 grid gap-3 max-w-md" on:submit|preventDefault={join}>
@@ -227,8 +227,6 @@ curl -X DELETE "$BASE/api/polls/$POLL_ID/availability/$AVAILABILITY_ID?t=$TOKEN&
         </div>
       </div>
       <GridCalendar
-        start_date={poll?.start_date}
-        end_date={poll?.end_date}
         duration={poll?.duration_minutes}
         myBlocks={participantId ? (availabilities || []).filter(a=>a.participant_id===participantId) : []}
         otherBlocks={(availabilities || []).filter(a=>!participantId || a.participant_id!==participantId)}
